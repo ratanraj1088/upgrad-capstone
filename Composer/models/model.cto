@@ -1,0 +1,196 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Define reliance network
+ */
+
+namespace com.reliance.network
+
+/**
+ * Specification for Exporter
+ */
+participant Exporter identified by exporterId {
+  o String exporterId
+  o String email
+  o String address
+  o Double accountBalance
+}
+
+/**
+ * Specification for Shipper
+ */
+participant Shipper identified by shipperID {
+  o String shipperID
+  o String email
+  o String address
+  o Double accountBalance
+}
+
+/**
+ * Specification for Importer
+ */
+participant Importer identified by importerId {
+  o String importerId
+  o String email
+  o String address
+  o Double accountBalance
+}
+
+/**
+ * Specification for Asset Shipment
+ */
+asset Shipment identified by shipmentId {
+  o String shipmentId
+  o AssetType assetType
+  o ShipmentStatus shipmentStatus
+  o Long unitCount
+  --> Contract contract
+  o TemperatureReading[] temperatureReading
+  o AccelerationReading[] accelerationReading
+  o GPSReading[] gpsReading
+}
+
+/**
+ * Specification for Contract Shipment
+ */
+asset Contract identified by contractId {
+  o String contractId
+  --> Exporter exporter
+  --> Importer importer
+  --> Shipper shipper
+  o DateTime arrivalDateTime 
+  o Double unitPrice
+  o Double minimumTemperature
+  o Double maximumTemperature
+  o Double minimumPenaltyFactor
+  o Double maximumPenaltyFactor
+  o Double maximumAcceleration
+}
+
+/**
+ * Event definition for temperature threshold
+ */
+event TemperatureThreshold {
+  o Double temperature
+  o String message
+  o String latitude
+  o String longitude
+  o String readingTime
+  --> Shipment shipment
+}
+
+/**
+ * Event definition for acceleration threshold
+ */
+event AccelerationThreshold {
+  o Double accelerationX
+  o Double accelerationY
+  o Double accelerationZ
+  o String message
+  o String latitude
+  o String longitude
+  o String readingTime
+  --> Shipment shipment
+}
+
+/**
+ * Event definition for shipment in a port
+ */
+event ShipmentInPort {
+  o String message
+  --> Shipment shipment
+}
+
+
+/**
+ * Transaction Specification for temperature reading
+ */
+transaction TemperatureReading extends ShipmentTransaction {
+  o Double celcius
+  o String latitude
+  o String longitude
+  o String readingTime optional
+}
+
+/**
+ * Transaction Specification for accleration reading
+ */
+transaction AccelerationReading extends ShipmentTransaction {
+  o Double accelerationX
+  o Double accelerationY
+  o Double accelerationZ
+  o String latitude
+  o String longitude
+  o String readingTime optional
+}
+
+/**
+ * Transaction Specification for GPS reading
+ */
+transaction GPSReading extends ShipmentTransaction {
+  o String latitude
+  o String longitude
+  o CompassDirection latitudeDirection
+  o CompassDirection longitudeDirection
+  o String readingTime optional
+  o String readingDate optional
+}
+
+/**
+ * Transaction Specification for GPS reading
+ */
+ transaction ShipmentReceived extends ShipmentTransaction  {
+   
+ }
+
+/**
+ *Asset type
+ */
+enum AssetType {
+  o Medicine
+  o Fuel
+  o Truck
+  o Wire
+  o Table
+  o Chair
+  o Laptop
+  o Phone
+}
+
+/**
+ * Shipment status
+ */
+enum ShipmentStatus {
+  o Created
+  o InTransit
+  o Arrived
+}
+
+/**
+ *Compass Direction
+ */
+enum CompassDirection {
+  o N
+  o E
+  o S
+  o W
+}
+
+/**
+ * Common transaction named shipment transaction
+ */
+abstract transaction ShipmentTransaction {
+  --> Shipment shipment
+}
